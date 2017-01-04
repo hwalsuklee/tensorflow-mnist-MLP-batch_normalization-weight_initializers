@@ -1,12 +1,12 @@
 # Various initializers and batch normalization
 
-An implementation of various initializers for weight and bias and batch normalization in Tensorflow.
+An implementation of weight/bias initializers and batch normalization in Tensorflow.
 
 MNIST database is used to show performance-comparison
 
 ## Network architecture
 
-In order to examine the effect of initializers and batch normalization, a simple network architecture called multi-layer perceptrons (MLP) is employed.
+In order to examine the effect of initializers and batch normalization, a simple network architecture called multilayer perceptrons (MLP) is employed.
 
 MLP has following architecture.
 
@@ -17,7 +17,7 @@ MLP has following architecture.
 
 ## Various initializers
 
-The following initializers for weights and biases of network are considered.
+The following initializers for weights/biases of network are considered.
 
 + Weight Initializer
   * normal, trucated normal
@@ -31,6 +31,8 @@ The following initializers for weights and biases of network are considered.
 + Bias Initilaizer : zero > normal
 
 Sample results are following.
+
+![weight_init](fig/results_weight_initializers.jpg)
 
 |Index|Weight Initializer|Bias Initializer|Accuracy|
 |:---:|:---:|:---:|:---:|
@@ -48,6 +50,8 @@ Batch normalization improves performance of network in terms of final accuracy a
 In this simulation, bias initalizer was zero-constant initializer and weight initializers were xavier / he.
 
 Sample results are following.
+
+![batch_norm](fig/results_batch_normalization.jpg)
 
 |Index|Weight Initializer|Batch Normalization|Accuracy|
 |:---:|:---:|:---:|:---:|
