@@ -64,10 +64,10 @@ Sample results are following.
 
 `python run_main.py --weight-init <weight initializer> --bias-init <bias initializer> --batch-norm <True or False>`
 
-`<weight initializer>` must be selected in [normal, truncated_normal, xaiver, he].</br>
+`<weight initializer>` must be selected in [normal, truncated_normal, xavier, he].</br>
 `<bias initializer>` must be selected in [normal, zero].
 
-You may command like `python run_main.py --weight-init xaiver --bias-init zero --batch-norm True`.
+You may command like `python run_main.py --weight-init xavier --bias-init zero --batch-norm True`.
 
 ## Acknowledgement
 
