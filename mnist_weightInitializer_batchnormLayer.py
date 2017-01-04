@@ -25,6 +25,66 @@ n_hidden_1 = 256
 n_hidden_2 = 256
 n_classes = 10
 
+# Store layers weight & bias
+
+with tf.name_scope('weight'):
+    normal_weights = {
+        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1]),name='w1_normal'),
+        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2]),name='w2_normal'),
+        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]),name='wout_normal')
+    }
+    truncated_normal_weights  = {
+        'h1': tf.Variable(tf.truncated_normal([n_input, n_hidden_1],stddev=0.1),name='w1_truncated_normal'),
+        'h2': tf.Variable(tf.truncated_normal([n_hidden_1, n_hidden_2],stddev=0.1),name='w2_truncated_normal'),
+        'out': tf.Variable(tf.truncated_normal([n_hidden_2, n_classes],stddev=0.1),name='wout_truncated_normal')
+    }
+    xavier_weights  = {
+        'h1': tf.get_variable('w1_xaiver', [n_input, n_hidden_1],initializer=tf.contrib.layers.xavier_initializer()),
+        'h2': tf.get_variable('w2_xaiver', [n_hidden_1, n_hidden_2],initializer=tf.contrib.layers.xavier_initializer()),
+        'out': tf.get_variable('wout_xaiver',[n_hidden_2, n_classes],initializer=tf.contrib.layers.xavier_initializer())
+    }
+    he_weights = {
+        'h1': tf.get_variable('w1_he', [n_input, n_hidden_1],
+                              initializer=tf.contrib.layers.variance_scaling_initializer()),
+        'h2': tf.get_variable('w2_he', [n_hidden_1, n_hidden_2],
+                              initializer=tf.contrib.layers.variance_scaling_initializer()),
+        'out': tf.get_variable('wout_he', [n_hidden_2, n_classes],
+                               initializer=tf.contrib.layers.variance_scaling_initializer())
+    }
+with tf.name_scope('bias'):
+    normal_biases = {
+        'b1': tf.Variable(tf.random_normal([n_hidden_1]),name='b1_normal'),
+        'b2': tf.Variable(tf.random_normal([n_hidden_2]),name='b2_normal'),
+        'out': tf.Variable(tf.random_normal([n_classes]),name='bout_normal')
+    }
+    zero_biases = {
+        'b1': tf.Variable(tf.zeros([n_hidden_1]),name='b1_zero'),
+        'b2': tf.Variable(tf.zeros([n_hidden_2]),name='b2_zero'),
+        'out': tf.Variable(tf.zeros([n_classes]),name='bout_normal')
+    }
+weight_initializer = {'normal':normal_weights, 'truncated_normal':truncated_normal_weights, 'xavier':xavier_weights, 'he':he_weights}
+bias_initializer = {'normal':normal_biases, 'zero':zero_biases}
+
+# user input
+from argparse import ArgumentParser
+
+WEIGHT_INIT = 'xavier'
+BIAS_INIT = 'zero'
+BACH_NORM = True
+
+def build_parser():
+    parser = ArgumentParser()
+    parser.add_argument('--weight-init',
+                        dest='weight_initializer', help='weight initializer',
+                        metavar='WEIGHT_INIT', required=True)
+    parser.add_argument('--bias-init',
+                        dest='bias_initializer', help='bias initializer',
+                        metavar='BIAS_INIT', required=True)
+    parser.add_argument('--batch-norm',
+                        dest='batch_normalization', help='boolean for activation of batch normalization',
+                        metavar='BACH_NORM', required=True)
+    return parser
+
 # Download the data from Yann's website, unless it's already here.
 def maybe_download(filename):
     if not tf.gfile.Exists(DATA_DIRECTORY):
@@ -76,37 +136,15 @@ def MLPwoBN(x, weights, biases):
         out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
     return out_layer
 
-# Store layers weight & bias
-with tf.name_scope('weight'):
-    normal_weights = {
-        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1]),name='w1_normal'),
-        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2]),name='w2_normal'),
-        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]),name='wout_normal')
-    }
-    truncated_normal_weights = {
-        'h1': tf.Variable(tf.truncated_normal([n_input, n_hidden_1],stddev=0.1),name='w1_truncated_normal'),
-        'h2': tf.Variable(tf.truncated_normal([n_hidden_1, n_hidden_2],stddev=0.1),name='w2_truncated_normal'),
-        'out': tf.Variable(tf.truncated_normal([n_hidden_2, n_classes],stddev=0.1),name='wout_truncated_normal')
-    }
-    xavier_weights = {
-        'h1': tf.get_variable('w1_xaiver', [n_input, n_hidden_1],initializer=tf.contrib.layers.xavier_initializer()),
-        'h2': tf.get_variable('w2_xaiver', [n_hidden_1, n_hidden_2],initializer=tf.contrib.layers.xavier_initializer()),
-        'out': tf.get_variable('wout_xaiver',[n_hidden_2, n_classes],initializer=tf.contrib.layers.xavier_initializer())
-    }
-with tf.name_scope('bias'):
-    normal_biases = {
-        'b1': tf.Variable(tf.random_normal([n_hidden_1]),name='b1_normal'),
-        'b2': tf.Variable(tf.random_normal([n_hidden_2]),name='b2_normal'),
-        'out': tf.Variable(tf.random_normal([n_classes]),name='bout_normal')
-    }
-    zero_biases = {
-        'b1': tf.Variable(tf.zeros([n_hidden_1]),name='b1_zero'),
-        'b2': tf.Variable(tf.zeros([n_hidden_2]),name='b2_zero'),
-        'out': tf.Variable(tf.zeros([n_classes]),name='bout_normal')
-    }
-
 # main function
-def main(weights, biases, batch_normalizer = False):
+def main():
+    # Parse argument
+    parser = build_parser()
+    options = parser.parse_args()
+    weights = weight_initializer[options.weight_initializer]
+    biases = bias_initializer[options.bias_initializer]
+    batch_normalization = options.batch_normalization
+
     # Import data
     mnist = input_data.read_data_sets('data/', one_hot=True)
 
@@ -118,7 +156,7 @@ def main(weights, biases, batch_normalizer = False):
     y_ = tf.placeholder(tf.float32, [None, 10]) #answer
 
     # Predict
-    if batch_normalizer:
+    if batch_normalization=='True':
         y = MLPwithBN(x,weights,biases,is_training)
     else:
         y = MLPwoBN(x, weights, biases)
@@ -180,4 +218,4 @@ def main(weights, biases, batch_normalizer = False):
     feed_dict={x: mnist.test.images, y_: mnist.test.labels, is_training: False}))
 
 if __name__ == '__main__':
-    main(xavier_weights, zero_biases, True)
+    main()
