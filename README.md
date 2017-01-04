@@ -59,3 +59,16 @@ Sample results are following.
 |xavier_withBN_0.9812|xavier|Used|0.9812|
 |he_woBN_0.9811|he|Unused|0.9811|
 |he_withBN_0.9837|he|Used|0.9837|
+
+## Usage
+
+`python run_main.py --weight-init <weight initializer> --bias-init <bias initializer> --batch-norm <True or False>`
+
+`<weight initializer>` must be selected in [normal, truncated_normal, xaiver, he].</br>
+`<bias initializer>` must be selected in [normal, zero].
+
+You may command like `python run_main.py --weight-init xaiver --bias-init zero --batch-norm True`.
+
+## Acknowledgement
+
+This implementation has been tested on Tensorflow r0.12.
