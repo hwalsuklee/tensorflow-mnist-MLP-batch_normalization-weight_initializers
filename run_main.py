@@ -169,6 +169,15 @@ def main():
     with tf.name_scope("ADAM"):
         train_step = tf.train.AdamOptimizer(0.001).minimize(loss)
 
+    # moving_mean and moving_variance need to be updated
+    if batch_normalization == "True":
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        if update_ops:
+            train_ops = [train_step] + update_ops
+            train_op_final = tf.group(*train_ops)
+        else:
+            train_op_final = train_step
+
     # Get accuracy of model
     with tf.name_scope("ACC"):
         correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
@@ -203,7 +212,7 @@ def main():
 
             # Run optimization op (backprop), loss op (to get loss value)
             # and summary nodes
-            _, train_accuracy, summary = sess.run([train_step, accuracy, merged_summary_op] , feed_dict={x: batch[0], y_: batch[1], is_training: True})
+            _, train_accuracy, summary = sess.run([train_op_final, accuracy, merged_summary_op] , feed_dict={x: batch[0], y_: batch[1], is_training: True})
 
             # Write logs at every iteration
             summary_writer.add_summary(summary, epoch * total_batch + i)
