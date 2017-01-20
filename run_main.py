@@ -103,9 +103,9 @@ def batch_norm_layer(inputT, is_training=True, scope=None):
     # Note: is_training is tf.placeholder(tf.bool) type
     return tf.cond(is_training,
                     lambda: batch_norm(inputT, is_training=True,
-                    center=True, scale=True, activation_fn=tf.nn.relu, updates_collections=None, decay=0.9, scope=scope),
+                    center=True, scale=True, activation_fn=tf.nn.relu, decay=0.9, scope=scope),
                     lambda: batch_norm(inputT, is_training=False,
-                    center=True, scale=True, activation_fn=tf.nn.relu, updates_collections=None, decay=0.9,
+                    center=True, scale=True, activation_fn=tf.nn.relu, decay=0.9,
                     scope=scope, reuse = True))
 
 # Create model of MLP with batch-normalization layer
